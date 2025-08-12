@@ -632,7 +632,6 @@
 
 
 // -------------------------------------------------------------------------------------------------------------------
-
 // File: /client/src/pages/Dashboard.js
 
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
@@ -771,6 +770,7 @@ export default function Dashboard() {
       }
     });
 
+    // **THE FIX**: Create local variables for the cleanup function to use.
     const currentSocket = socket.current;
     const currentPeerConnections = peerConnections.current;
 
@@ -778,6 +778,7 @@ export default function Dashboard() {
       currentSocket.disconnect();
       Object.values(currentPeerConnections).forEach(pc => pc.close());
     };
+    // **THE FIX**: Add PC_CONFIG to the dependency array.
   }, [user, fetchHistory, handleDataChannelMessage, PC_CONFIG]);
   
   const handleSendFile = async (file, targetId) => {
