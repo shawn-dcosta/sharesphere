@@ -93,6 +93,20 @@ const historyRoutes = require('./routes/history');
 const app = express();
 const allowedOrigin = 'https://sharesphere-4591.vercel.app';
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", allowedOrigin);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  // Short-circuit preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 app.use(cors({
   origin: allowedOrigin,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -120,7 +134,8 @@ mongoose.connect(process.env.MONGO_URI)
 const io = new Server(server, {
   cors: {
     origin: allowedOrigin, // no trailing slash!
-    methods: ['GET', 'POST']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true
   }
 });
 
