@@ -217,7 +217,7 @@ const allowedOrigin = 'https://sharesphere-4591.vercel.app';
 // 1. CORS Middleware: This should come first.
 // It correctly handles all CORS-related headers, including preflight OPTIONS requests.
 app.use(cors({
-  origin: allowedOrigin,
+  origin: ["*"],
   credentials: true, // Allows cookies and authorization headers to be sent
 }));
 
