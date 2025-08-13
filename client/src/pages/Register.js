@@ -99,7 +99,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}}/api/auth/register`, { username, email, password, confirmPassword });
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, { username, email, password, confirmPassword });
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');

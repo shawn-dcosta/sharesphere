@@ -90,7 +90,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}}/api/auth/login`, { email, password });
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, { email, password });
       login(res.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to login. Please check your credentials.');
