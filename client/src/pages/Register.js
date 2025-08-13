@@ -73,6 +73,7 @@
 
 // ------------------------------------------------------------------------------------------------------------------------
 
+require('dotenv').config();
 import { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -100,7 +101,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await axios.post('/api/auth/register', { username, email, password, confirmPassword });
+      await axios.post(`${process.env.VITE_REACT_APP_BACKEND_BASE_URL}/api/auth/register`, { username, email, password, confirmPassword });
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');

@@ -71,6 +71,7 @@
 
 
 // File: /client/src/pages/Login.js
+require('dotenv').config();
 import { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -89,7 +90,7 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('/api/auth/login', { email, password });
+      const res = await axios.post(`${process.env.VITE_REACT_APP_BACKEND_BASE_URL}/api/auth/login`, { email, password });
       login(res.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to login. Please check your credentials.');

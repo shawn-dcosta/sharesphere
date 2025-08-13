@@ -634,6 +634,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 // File: /client/src/pages/Dashboard.js
 
+require('dotenv').config();
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import io from 'socket.io-client';
 import { User, Send, File as FileIcon, LogOut, Download, UploadCloud, CheckCircle, XCircle, Clock } from 'lucide-react';
@@ -653,7 +654,7 @@ export default function Dashboard() {
   const fileInputRef = useRef(null);
   const targetUserRef = useRef(null);
 
-  const SOCKET_URL = ''; // Use relative path for deployment
+  const SOCKET_URL = process.env.VITE_REACT_APP_BACKEND_BASE_URL; // Use relative path for deployment
   const PC_CONFIG = useMemo(() => ({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }), []);
   const CHUNK_SIZE = 65536; // 64KB
   const BUFFER_THRESHOLD = CHUNK_SIZE * 10; // Pause sending if buffer exceeds 640KB
@@ -661,7 +662,7 @@ export default function Dashboard() {
   const fetchHistory = useCallback(async () => {
     if (!user?._id) return;
     try {
-        const res = await axios.get(`/api/history/${user._id}`);
+        const res = await axios.get(`${SOCKET_URL}/api/history/${user._id}`);
         setHistory(res.data);
     } catch (error) {
         console.error("Failed to fetch history", error);
@@ -671,7 +672,7 @@ export default function Dashboard() {
   const addTransferLog = useCallback(async (receiverId, fileName, fileSize) => {
     if (!user?._id) return;
     try {
-        await axios.post(`/api/history`, {
+        await axios.post(`${SOCKET_URL}/api/history`, {
             senderId: user._id,
             receiverId,
             fileName,
