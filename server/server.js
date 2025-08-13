@@ -91,7 +91,21 @@ const authRoutes = require('./routes/auth');
 const historyRoutes = require('./routes/history');
 
 const app = express();
-app.use(cors());
+const allowedOrigin = 'https://sharesphere-4591.vercel.app';
+
+app.use(cors({
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
+
+// ✅ Ensure OPTIONS preflight passes
+app.options('*', cors({
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
@@ -104,10 +118,10 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error("MongoDB connection error:", err));
 
 const io = new Server(server, {
-    cors: {
-        origin: 'https://sharesphere-4591.vercel.app/', // For development. Change to your live frontend URL for production.
-        methods: ['GET', 'POST'],
-    },
+  cors: {
+    origin: allowedOrigin, // no trailing slash!
+    methods: ['GET', 'POST']
+  }
 });
 
 let onlineUsers = {}; // { userId: { socketId, username } }
