@@ -101,7 +101,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await axios.post(`${process.env.VITE_REACT_APP_BACKEND_BASE_URL}/api/auth/register`, { username, email, password, confirmPassword });
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/register`, { username, email, password, confirmPassword });
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
