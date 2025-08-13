@@ -80,6 +80,120 @@
 // ---------------------------------------------------------------------------------------------------------------
 
 
+// require('dotenv').config();
+// const express = require('express');
+// const http = require('http');
+// const mongoose = require('mongoose');
+// const cors = require('cors');
+// const { Server } = require('socket.io');
+
+// const authRoutes = require('./routes/auth');
+// const historyRoutes = require('./routes/history');
+
+// const app = express();
+// const allowedOrigin = 'https://sharesphere-4591.vercel.app';
+
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", allowedOrigin);
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   res.header("Access-Control-Allow-Credentials", "true");
+
+//   // Short-circuit preflight requests
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200);
+//   }
+
+//   next();
+// });
+
+// app.use(cors({
+//   origin: allowedOrigin,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   credentials: true
+// }));
+
+// // ✅ Ensure OPTIONS preflight passes
+// app.options('*', cors({
+//   origin: allowedOrigin,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   credentials: true
+// }));
+
+// app.use(express.json());
+
+// app.use('/api/auth', authRoutes);
+// app.use('/api/history', historyRoutes);
+
+// const server = http.createServer(app);
+
+// mongoose.connect(process.env.MONGO_URI)
+//   .then(() => console.log("MongoDB connected successfully"))
+//   .catch(err => console.error("MongoDB connection error:", err));
+
+// const io = new Server(server, {
+//   cors: {
+//     origin: allowedOrigin, // no trailing slash!
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//     credentials: true
+//   }
+// });
+
+// let onlineUsers = {}; // { userId: { socketId, username } }
+
+// io.on('connection', (socket) => {
+//     console.log('A user connected:', socket.id);
+
+//     socket.on('join', ({ userId, username }) => {
+//         onlineUsers[userId] = { socketId: socket.id, username };
+//         broadcastOnlineUsers();
+//     });
+
+//     const getUserIdFromSocketId = (socketId) => {
+//         return Object.keys(onlineUsers).find(userId => onlineUsers[userId].socketId === socketId);
+//     }
+
+//     const broadcastOnlineUsers = () => {
+//         const users = Object.entries(onlineUsers).map(([id, { username }]) => ({ id, username }));
+//         io.emit('online-users', users);
+//     }
+
+//     socket.on('offer', (payload) => {
+//         const targetUser = onlineUsers[payload.target];
+//         if (targetUser) {
+//             io.to(targetUser.socketId).emit('offer', { ...payload, from: getUserIdFromSocketId(socket.id) });
+//         }
+//     });
+
+//     socket.on('answer', (payload) => {
+//         const targetUser = onlineUsers[payload.target];
+//         if (targetUser) {
+//             io.to(targetUser.socketId).emit('answer', { ...payload, from: getUserIdFromSocketId(socket.id) });
+//         }
+//     });
+
+//     socket.on('ice-candidate', (payload) => {
+//         const targetUser = onlineUsers[payload.target];
+//         if (targetUser) {
+//             io.to(targetUser.socketId).emit('ice-candidate', { ...payload, from: getUserIdFromSocketId(socket.id) });
+//         }
+//     });
+
+//     socket.on('disconnect', () => {
+//         const disconnectedUserId = getUserIdFromSocketId(socket.id);
+//         if (disconnectedUserId) {
+//             delete onlineUsers[disconnectedUserId];
+//             broadcastOnlineUsers();
+//         }
+//         console.log('User disconnected:', socket.id);
+//     });
+// });
+
+// const PORT = process.env.PORT || 5000;
+// server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// // module.exports = app;
+
+
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
@@ -93,47 +207,39 @@ const historyRoutes = require('./routes/history');
 const app = express();
 const allowedOrigin = 'https://sharesphere-4591.vercel.app';
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", allowedOrigin);
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  // Short-circuit preflight requests
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
-
+// ✅ Apply CORS globally
 app.use(cors({
   origin: allowedOrigin,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
 
-// ✅ Ensure OPTIONS preflight passes
-app.options('*', cors({
-  origin: allowedOrigin,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
-}));
+// ✅ Handle all OPTIONS preflight requests
+app.options('*', (req, res) => {
+  res.header("Access-Control-Allow-Origin", allowedOrigin);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(200);
+});
 
 app.use(express.json());
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/history', historyRoutes);
 
 const server = http.createServer(app);
 
+// MongoDB connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected successfully"))
   .catch(err => console.error("MongoDB connection error:", err));
 
+// ✅ Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigin, // no trailing slash!
+    origin: allowedOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
   }
@@ -142,53 +248,52 @@ const io = new Server(server, {
 let onlineUsers = {}; // { userId: { socketId, username } }
 
 io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
+  console.log('A user connected:', socket.id);
 
-    socket.on('join', ({ userId, username }) => {
-        onlineUsers[userId] = { socketId: socket.id, username };
-        broadcastOnlineUsers();
-    });
+  socket.on('join', ({ userId, username }) => {
+    onlineUsers[userId] = { socketId: socket.id, username };
+    broadcastOnlineUsers();
+  });
 
-    const getUserIdFromSocketId = (socketId) => {
-        return Object.keys(onlineUsers).find(userId => onlineUsers[userId].socketId === socketId);
+  const getUserIdFromSocketId = (socketId) => {
+    return Object.keys(onlineUsers).find(userId => onlineUsers[userId].socketId === socketId);
+  };
+
+  const broadcastOnlineUsers = () => {
+    const users = Object.entries(onlineUsers).map(([id, { username }]) => ({ id, username }));
+    io.emit('online-users', users);
+  };
+
+  socket.on('offer', (payload) => {
+    const targetUser = onlineUsers[payload.target];
+    if (targetUser) {
+      io.to(targetUser.socketId).emit('offer', { ...payload, from: getUserIdFromSocketId(socket.id) });
     }
+  });
 
-    const broadcastOnlineUsers = () => {
-        const users = Object.entries(onlineUsers).map(([id, { username }]) => ({ id, username }));
-        io.emit('online-users', users);
+  socket.on('answer', (payload) => {
+    const targetUser = onlineUsers[payload.target];
+    if (targetUser) {
+      io.to(targetUser.socketId).emit('answer', { ...payload, from: getUserIdFromSocketId(socket.id) });
     }
+  });
 
-    socket.on('offer', (payload) => {
-        const targetUser = onlineUsers[payload.target];
-        if (targetUser) {
-            io.to(targetUser.socketId).emit('offer', { ...payload, from: getUserIdFromSocketId(socket.id) });
-        }
-    });
+  socket.on('ice-candidate', (payload) => {
+    const targetUser = onlineUsers[payload.target];
+    if (targetUser) {
+      io.to(targetUser.socketId).emit('ice-candidate', { ...payload, from: getUserIdFromSocketId(socket.id) });
+    }
+  });
 
-    socket.on('answer', (payload) => {
-        const targetUser = onlineUsers[payload.target];
-        if (targetUser) {
-            io.to(targetUser.socketId).emit('answer', { ...payload, from: getUserIdFromSocketId(socket.id) });
-        }
-    });
-
-    socket.on('ice-candidate', (payload) => {
-        const targetUser = onlineUsers[payload.target];
-        if (targetUser) {
-            io.to(targetUser.socketId).emit('ice-candidate', { ...payload, from: getUserIdFromSocketId(socket.id) });
-        }
-    });
-
-    socket.on('disconnect', () => {
-        const disconnectedUserId = getUserIdFromSocketId(socket.id);
-        if (disconnectedUserId) {
-            delete onlineUsers[disconnectedUserId];
-            broadcastOnlineUsers();
-        }
-        console.log('User disconnected:', socket.id);
-    });
+  socket.on('disconnect', () => {
+    const disconnectedUserId = getUserIdFromSocketId(socket.id);
+    if (disconnectedUserId) {
+      delete onlineUsers[disconnectedUserId];
+      broadcastOnlineUsers();
+    }
+    console.log('User disconnected:', socket.id);
+  });
 });
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-// module.exports = app;
