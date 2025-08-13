@@ -105,7 +105,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 const io = new Server(server, {
     cors: {
-        origin: '*', // For development. Change to your live frontend URL for production.
+        origin: 'https://sharesphere-4591.vercel.app/', // For development. Change to your live frontend URL for production.
         methods: ['GET', 'POST'],
     },
 });
