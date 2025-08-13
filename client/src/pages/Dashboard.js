@@ -654,7 +654,7 @@ export default function Dashboard() {
   const fileInputRef = useRef(null);
   const targetUserRef = useRef(null);
 
-  const SOCKET_URL = import.meta.env.VITE_API_URL; // Use relative path for deployment
+  const SOCKET_URL = process.env.REACT_APP_API_URL; // Use relative path for deployment
   const PC_CONFIG = useMemo(() => ({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }), []);
   const CHUNK_SIZE = 65536; // 64KB
   const BUFFER_THRESHOLD = CHUNK_SIZE * 10; // Pause sending if buffer exceeds 640KB
