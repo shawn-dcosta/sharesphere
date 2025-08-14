@@ -1,0 +1,23 @@
+config:
+  target: "wss://sharesphere-j1xq.onrender.com"   # Replace with your Socket.IO server URL (ws:// for local, wss:// for live)
+  phases:
+    - duration: 60       # Test for 60 seconds
+      arrivalRate: 10    # Start with 10 new users per second
+      rampTo: 100        # Ramp up to 100 new users/sec over the test
+  engines:
+    socketio: {}
+
+scenarios:
+  - name: "Socket.IO Connection Test"
+    engine: "socketio"
+    flow:
+      - emit:
+          channel: "join"
+          data:
+            username: "test-user-{{ $randomNumber(1,100000) }}"
+      - think: 2
+      - emit:
+          channel: "send_message"
+          data:
+            message: "Hello from test"
+      - think: 1
